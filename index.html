@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>برعاية ابو مالك</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background: linear-gradient(135deg, #1f2c56, #4e6ca8);
+    direction: rtl;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+  }
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  form, .payment-info {
+    max-width: 400px;
+    width: 100%;
+    margin: 20px auto;
+    background: rgba(255 255 255 / 0.1);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgb(255 255 255 / 0.2);
+    color: white;
+    backdrop-filter: blur(10px);
+  }
+  label {
+    display: block;
+    margin-bottom: 6px;
+  }
+  input, select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+  }
+  button {
+    padding: 10px 15px;
+    background-color: #1e90ff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background-color: #0056b3;
+  }
+  .hidden {
+    display: none;
+  }
+  #priceDisplay {
+    font-weight: bold;
+    margin-top: -10px;
+    margin-bottom: 15px;
+    color: #add8e6;
+  }
+  #container3d {
+    width: 400px;
+    height: 300px;
+    margin: 20px auto 40px;
+  }
+</style>
+</head>
+<body>
+
+<h2>برعاية ابو مالك</h2>
+
+<!-- حاوية النص الثلاثي الأبعاد -->
+<div id="container3d"></div>
+
+<form id="orderForm">
+  <label for="fullName">الاسم في ببجي:</label>
+  <input type="text" id="fullName" name="fullName" required />
+
+  <label for="userID">الايدي في ببجي:</label>
+  <input type="text" id="userID" name="userID" required />
+
+  <label for="phoneNumber">رقم الهاتف الذي يتم تحويل المبلغ منه:</label>
+  <input type="tel" id="phoneNumber" name="phoneNumber" pattern="[0-9]{10,15}" placeholder="أدخل رقم الهاتف" required />
+
+  <label for="amount">كمية الشدات:</label>
+  <select id="amount" name="amount" required>
+    <option value="">اختر الكمية</option>
+    <option value="60">60 شدة</option>
+    <option value="325">325 شدة</option>
+    <option value="660">660 شدة</option>
+    <option value="1800">1800 شدة</option>
+    <option value="3850">3850 شدة</option>
+    <option value="8100">8100 شدة</option>
+  </select>
+  <p id="priceDisplay"></p>
+
+  <label for="paymentMethod">طريقة الدفع:</label>
+  <select id="paymentMethod" name="paymentMethod" required>
+    <option value="">اختر طريقة الدفع</option>
+    <option value="محفظة إلكترونية">محفظة إلكترونية</option>
+  </select>
+
+  <button type="submit">إرسال الطلب</button>
+</form>
+
+<div id="paymentInfo" class="payment-info hidden">
+  <h2>بيانات الدفع</h2>
+  <p>يرجى تحويل المبلغ إلى:</p>
+  <ul>
+    <li>محفظة إلكترونية: 01118799321</li>
+  </ul>
+  <p>بعد التحويل، يمكنك التواصل معنا لتأكيد الطلب.</p>
+</div>
+
+<!-- مكتبات Three.js -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.153.0/examples/js/loaders/FontLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.153.0/examples/js/geometries/TextGeometry.js"></script>
+
+<script>
+  // تحديث السعر حسب الكمية
+  const amountSelect = document.getElementById('amount');
+  const priceDisplay = document.getElementById('priceDisplay');
+  const prices = {
+    "60": "55 جنيه مصري",
+    "325": "225 جنيه مصري",
+    "660": "435 جنيه مصري",
+    "1800": "1100 جنيه مصري",
+    "3850": "2135 جنيه مصري",
+    "8100": "4200 جنيه مصري"
+  };
+
+  amountSelect.addEventListener('change', () => {
+    const selected = amountSelect.value;
+    priceDisplay.textContent = selected && prices[selected] ? `السعر: ${prices[selected]}` : '';
+  });
+
+  // التعامل مع إرسال الفورم
+  const form = document.getElementById('orderForm');
+  const paymentInfo = document.getElementById('paymentInfo');
+
+  form.addEventListener('submit', function(event) {
+    event.preventDefault();
+    const data = new FormData(form);
+
+    fetch('https://formcarry.com/s/0e0NQVTJccF', {
+      method: 'POST',
+      body: data,
+      headers: { 'Accept': 'application/json' }
+    })
+    .then(response => {
+      if (response.ok) {
+        alert('تم إرسال الطلب بنجاح!');
+        form.classList.add('hidden');
+        paymentInfo.classList.remove('hidden');
+      } else {
+        alert('حدث خطأ أثناء إرسال الطلب. حاول مرة أخرى.');
+      }
+    })
+    .catch(error => alert('حدث خطأ في الاتصال: ' + error));
+  });
+
+  // === إعداد مشهد نص 3D مع Three.js ===
+  const container3d = document.getElementById('container3d');
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, container3d.clientWidth / container3d.clientHeight, 0.1, 1000);
+  camera.position.set(0, 10, 40);
+
+  const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+  renderer.setSize(container3d.clientWidth, container3d.clientHeight);
+  container3d.appendChild(renderer.domElement);
+
+  // إضاءة لامعة لجعل النص بارز وواقعي
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+  directionalLight.position.set(0, 20, 10);
+  scene.add(directionalLight);
+
+  const ambientLight = new THREE.AmbientLight(0x404040, 0.8);
+  scene.add(ambientLight);
+
+  // تحميل الخط
+  const loader = new THREE.FontLoader();
+  loader.load('https://cdn.jsdelivr.net/npm/three@0.153.0/examples/fonts/helvetiker_regular.typeface.json', function(font) {
+    const textGeometry = new THREE.TextGeometry('طلب شدات ببجي', {
+      font: font,
+      size: 5,
+      height: 1.2,
+      curveSegments: 12,
+      bevelEnabled: true,
+      bevelThickness: 0.4,
+      bevelSize: 0.3,
+      bevelOffset: 0,
+      bevelSegments: 5
+    });
+
+    textGeometry.center();
+
+    const material = new THREE.MeshPhysicalMaterial({
+      color: 0x1e90ff,
+      metalness: 0.7,
+      roughness: 0.2,
+      clearcoat: 1,
+      clearcoatRoughness: 0.1,
+      reflectivity: 0.9,
+      sheen: 0.8
+    });
+
+    const textMesh = new THREE.Mesh(textGeometry, material);
+    scene.add(textMesh);
+
+    // تدوير النص ببطء لعرض ثلاثي الأبعاد
+    function animate() {
+      requestAnimationFrame(animate);
+      textMesh.rotation.y += 0.01;
+      renderer.render(scene, camera);
+    }
+    animate();
+  });
+
+  // تحديث حجم الرندر عند تغيير حجم النافذة
+  window.addEventListener('resize', () => {
+    camera.aspect = container3d.clientWidth / container3d.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container3d.clientWidth, container3d.clientHeight);
+  });
+</script>
+
+</body>
+</html>
